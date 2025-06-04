@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2021",          // Modern Node.js supports this
+    "module": "commonjs",        // CRITICAL for Node.js backend and ts-node without --esm
+    "outDir": "./dist",          // Where compiled JS goes
+    "rootDir": "./src",          // Where your TS source files are
+    "strict": true,              // Good practice
+    "esModuleInterop": true,     // Helps with imports
+    "skipLibCheck": true,        // Skips type checking of declaration files
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true    // Good if you ever need to import JSON
+  },
+  "include": ["src/**/*.ts"],    // Only include TS files in src
+  "exclude": ["node_modules"]    // Exclude node_modules
+}
