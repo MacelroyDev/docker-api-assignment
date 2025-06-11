@@ -25,7 +25,7 @@ export async function connectDb(): Promise<void> {
         console.log('Checking and creating database tables...');
 
         // Construct the path to your SQL initialization file
-        const sqlFilePath = path.join(__dirname, 'sql', 'init.sql');
+        const sqlFilePath = path.join(__dirname, '..', 'src', 'sql', 'init.sql');
         const schemaSql = await fs.readFile(sqlFilePath, { encoding: 'utf8' });
 
         // Execute all queries from the SQL file
