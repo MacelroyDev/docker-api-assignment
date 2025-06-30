@@ -67,6 +67,65 @@ app.post('/student', async (req: Request, res: Response) => {
     }
 });
 
+// PUT Function for updating student records
+app.put('/student/:studentID', async (req: Request, res: Response) => {
+    const { studentID } = req.params; // Get studentID from URL parameters
+    const { studentName, course, presentDate } = req.body; // Get update data from body
+
+    // Check if at least one field to update is provided
+    if (!studentName && !course && !presentDate) {
+        return res.status(400).json({ message: 'No fields provided for update. Please provide studentName, course, or presentDate.' });
+    }
+
+    try {
+        // Build the SET clause dynamically for the UPDATE query
+        const updates: string[] = [];
+        const params: any[] = [];
+        let paramIndex = 1;
+
+        if (studentName !== undefined) {
+            updates.push(`studentName = $${paramIndex++}`);
+            params.push(studentName);
+        }
+        if (course !== undefined) {
+            updates.push(`course = $${paramIndex++}`);
+            params.push(course);
+        }
+        if (presentDate !== undefined) {
+            updates.push(`presentDate = $${paramIndex++}`);
+            params.push(presentDate);
+        }
+
+        // Add the studentID to the parameters for the WHERE clause
+        params.push(studentID);
+
+        const updateQuery = `
+            UPDATE students
+            SET ${updates.join(', ')}
+            WHERE studentID = $${paramIndex}
+            RETURNING *;
+        `;
+
+        console.log(`Attempting to update student: ${studentID}`);
+        const result = await query(updateQuery, params);
+
+        if (result.rows.length === 0) {
+            // No student found with the given studentID
+            return res.status(404).json({ message: 'Student not found.' });
+        }
+
+        // Student updated successfully
+        res.status(200).json({
+            message: 'Student updated successfully',
+            student: result.rows[0] // Return the updated student data
+        });
+
+    } catch (error) {
+        console.error('Error updating student record:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 // Other global error handling
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof SyntaxError && 'body' in err) {
