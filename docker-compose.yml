@@ -1,50 +1,35 @@
 version: '3.8' # Docker Compose file format version
 
 services:
-  # Service for your first Node.js application instance
-  app1:
-    build: . # Tells Docker Compose to build the image from the current directory
+  # Service for your Node.js application
+  app:
+    build: . # Tells Docker Compose to build the image from the current directory (using your Dockerfile)
     ports:
       - "8080:8080" # Map host port 8080 to container port 8080
     environment: # Environment variables injected into the 'app' container
-      DB_USER: ${DB_USER}
-      DB_HOST: db # This is the service name of your database container
+      # These variables connect your Node.js app to the database container
+      DB_USER: ${DB_USER}       # Read from your .env file
+      DB_HOST: db               # This is the service name of your database container
       DB_NAME: ${DB_NAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_PORT: ${DB_PORT}
-      PORT: 8080
+      PORT: 8080                # The port your Express app listens on
     depends_on:
-      - db
-    restart: unless-stopped
-
-  # Service for your second Node.js application instance
-  app2:
-    build: . # Build from the same Dockerfile
-    ports:
-      - "8081:8080" # Map host port 8081 to container port 8080
-    environment: # Environment variables for the second instance
-      DB_USER: ${DB_USER}
-      DB_HOST: db
-      DB_NAME: ${DB_NAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
-      PORT: 8080 # The container still listens on 8080 internally
-    depends_on:
-      - db
-    restart: unless-stopped
+      - db # Ensures the 'db' service starts before 'app'
+    restart: unless-stopped # Keep container running unless explicitly stopped
 
   # Service for your PostgreSQL database
   db:
-    image: postgres:13-alpine
-    environment:
+    image: postgres:13-alpine # Use a specific version of PostgreSQL for consistency
+    environment: # Environment variables for the PostgreSQL container
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432" # Map host port 5432 to container port 5432 (optional, but good for local DB access)
     volumes:
-      - db_data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - db_data:/var/lib/postgresql/data # Persist database data using a named volume
+    restart: unless-stopped # Keep container running unless explicitly stopped
 
 volumes:
-  db_data:
+  db_data: # Define the named volume for database persistence
